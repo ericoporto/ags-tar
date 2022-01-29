@@ -16,25 +16,28 @@ set GAME_ARCHIVE="%~nx1.tar.gz"
 set GAME_MTREE="%~nx1.mtree"
 
 for /f %%a in ('certutil -hashfile %GAME_PATH% SHA1 ^| find /v " "') do set SHA1=%%a
+>nul del /f %GAME_MTREE%
+set LF=^
+
 
 for /f "tokens=1-6 delims= " %%a in ('^""%TAR%" -acf - --format mtree --options mtree:^^^!all^,mode^,gid^,uid^,type^,sha1 -C %GAME_DIR% *^"') do (
     if "%%b" == "" (
         REM file header
-        > %GAME_MTREE% echo %%a
+        <nul set /P ="%%a!LF!"
     ) else (
         if "%%f" == "" (
            REM directory
-           >> %GAME_MTREE% echo %%a mode=755 %%c %%d %%e
+           <nul set /P ="%%a mode=755 %%c %%d %%e!LF!"
         ) else (
            REM file
            set FILE_MODE=644
            if "%%a" == "./data/ags32" set FILE_MODE=755
            if "%%a" == "./data/ags64" set FILE_MODE=755
            if "%%f" == "sha1digest=%SHA1%" set FILE_MODE=755
-           >> %GAME_MTREE% echo %%a mode=!FILE_MODE! %%c %%d %%e %%f
+           <nul set /P ="%%a mode=!FILE_MODE! %%c %%d %%e %%f!LF!"
        )
     )
-)
+)>> %GAME_MTREE%
 
 type %GAME_MTREE% | "%TAR%" -cvvzf %GAME_ARCHIVE% -C %GAME_DIR% @-
 goto :end
