@@ -16,7 +16,7 @@ set GAME_ARCHIVE="%~nx1.tar.gz"
 set GAME_MTREE="%~nx1.mtree"
 
 for /f %%a in ('certutil -hashfile %GAME_PATH% SHA1 ^| find /v " "') do set SHA1=%%a
->nul del /f %GAME_MTREE%
+2>nul del /f %GAME_MTREE%
 set LF=^
 
 
